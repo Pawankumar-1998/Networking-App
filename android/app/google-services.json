@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "376372160106",
+    "project_id": "we-chat-148dc",
+    "storage_bucket": "we-chat-148dc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376372160106:android:4eccd20e1f038d07524c13",
+        "android_client_info": {
+          "package_name": "com.example.mymessages"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "376372160106-3nrtadv2n5341q4uiuts76l289676u4o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mymessages",
+            "certificate_hash": "5670ee484ae7038ff055cc5d4ee9bafb77495757"
+          }
+        },
+        {
+          "client_id": "376372160106-n0ivjhlehtdj1shbgokv048hvqmnbr2n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-qZGkYyQefbASxGjY1G9RMoRjG9PMQiE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "376372160106-n0ivjhlehtdj1shbgokv048hvqmnbr2n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "376372160106-hcm2p7pbftg4l5v121ne36aeqh2mrig1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mymessages"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
