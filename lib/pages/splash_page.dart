@@ -1,7 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mymessages/pages/auth/login_page.dart';
+import 'package:mymessages/pages/home_page.dart';
 
-late Size mq;
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -17,18 +18,25 @@ class _SplashPageState extends State<SplashPage> {
     Future.delayed(
       const Duration(milliseconds: 1500),
       () {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const LoginPage(),
-            ));
+        if (FirebaseAuth.instance.currentUser != null) {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const HomePage(),
+              ));
+        } else {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const LoginPage(),
+              ));
+        }
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    mq = MediaQuery.of(context).size;
     return Scaffold(
       // appBar: AppBar(
       //   automaticallyImplyLeading: false,

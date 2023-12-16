@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:mymessages/firebase_options.dart';
 import 'package:mymessages/pages/splash_page.dart';
 
+late Size mq;
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   _initializeFirebase();
@@ -15,8 +17,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    mq = MediaQuery.of(context).size;
     return MaterialApp(
       title: 'We chat',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,

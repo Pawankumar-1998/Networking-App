@@ -1,8 +1,9 @@
-
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/helper/dialog_box.dart';
 import 'package:mymessages/pages/home_page.dart';
 
 late Size mq;
@@ -31,7 +32,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _handelGoogleSignIn() {
+    Dialogs.showProgressBar(context);
     _signInWithGoogle().then((user) {
+      Navigator.of(context).pop();
       if (user != null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const HomePage()));
@@ -57,10 +60,11 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      return await Providers.auth.signInWithCredential(credential);
     } catch (e) {
-      print(e);
-      
+      // ignore: use_build_context_synchronously
+      Dialogs.showSnackbar(context, 'Please chek your internet connection');
+      return null;
     }
   }
 
