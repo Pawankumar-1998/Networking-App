@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/pages/auth/login_page.dart';
 import 'package:mymessages/widgets/chat_user_card.dart';
 
 class HomePage extends StatelessWidget {
@@ -30,7 +31,9 @@ class HomePage extends StatelessWidget {
         ),
       ),
       body: ListView.builder(
-        itemCount: 1,
+        padding: EdgeInsets.only(top: mq.height * .01),
+        physics: const BouncingScrollPhysics(),
+        itemCount: 6,
         itemBuilder: (context, index) {
           return const ChatUserCard();
         },

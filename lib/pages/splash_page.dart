@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mymessages/pages/auth/login_page.dart';
 import 'package:mymessages/pages/home_page.dart';
 
-
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -37,6 +36,7 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    mq = MediaQuery.of(context).size;
     return Scaffold(
       // appBar: AppBar(
       //   automaticallyImplyLeading: false,

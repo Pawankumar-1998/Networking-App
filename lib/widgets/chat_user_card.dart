@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mymessages/main.dart';
+import 'package:mymessages/pages/auth/login_page.dart';
 
 class ChatUserCard extends StatefulWidget {
   const ChatUserCard({super.key});
@@ -13,8 +13,9 @@ class _ChatUserCardState extends State<ChatUserCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(
-          horizontal: mq.width * .03, vertical: mq.height * .01),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 1,
+      margin: EdgeInsets.symmetric(horizontal: mq.width * .04, vertical: 4),
       child: InkWell(
         onTap: () {},
         child: const ListTile(
