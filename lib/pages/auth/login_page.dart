@@ -33,11 +33,20 @@ class _LoginPageState extends State<LoginPage> {
 
   _handelGoogleSignIn() {
     Dialogs.showProgressBar(context);
-    _signInWithGoogle().then((user) {
+    _signInWithGoogle().then((user) async {
       Navigator.of(context).pop();
       if (user != null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const HomePage()));
+        if (await (Providers.userExists())) {
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const HomePage()));
+        } else {
+          await Providers.createUser().then((value) {
+            // ignore: use_build_context_synchronously
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => const HomePage()));
+          });
+        }
       }
     });
   }
