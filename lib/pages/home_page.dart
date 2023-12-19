@@ -1,14 +1,25 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/main.dart';
 import 'package:mymessages/models/chat_user.dart';
-import 'package:mymessages/pages/auth/login_page.dart';
+import 'package:mymessages/pages/profile_page.dart';
 import 'package:mymessages/widgets/chat_user_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    Providers.currentUserInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +32,13 @@ class HomePage extends StatelessWidget {
         title: const Text('We chat'),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ProfilePage(user: Providers.currentUser),
+                ));
+              },
+              icon: const Icon(Icons.people_alt)),
         ],
       ),
       floatingActionButton: Padding(
@@ -35,7 +52,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
       body: StreamBuilder(
-          stream: Providers.firestore.collection('users').snapshots(),
+          stream: Providers.getAllUser(),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:

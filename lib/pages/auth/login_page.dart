@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/helper/dialog_box.dart';
+import 'package:mymessages/main.dart';
 import 'package:mymessages/pages/home_page.dart';
 
-late Size mq;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -50,15 +50,18 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
   }
+  
 
   // function for google login
   Future<UserCredential?> _signInWithGoogle() async {
     try {
       await InternetAddress.lookup('www.google.com');
-// Trigger the authentication flow
+        // Initiates the Google Sign-In process, prompting the user to select their Google account.
+        // Returns a GoogleSignInAccount object representing the signed-in Google account. This object may be null if the user cancels the sign-in process. 
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-      // Obtain the auth details from the request
+      ///Retrieves the authentication details (tokens) associated with the signed-in Google account.  
+      /// Returns a GoogleSignInAuthentication object containing an access token (accessToken) and an ID token (idToken).
       final GoogleSignInAuthentication? googleAuth =
           await googleUser?.authentication;
 
@@ -79,7 +82,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    mq = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,

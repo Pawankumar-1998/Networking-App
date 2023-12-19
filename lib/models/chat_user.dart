@@ -20,6 +20,8 @@ class ChatUser {
   late final String email;
   late final String pushToken;
 
+//  this function is used to get the json object as the firebase cloud store returns the json object so it gets the json object and 
+//  loads the data to our own user defined object in our case Chatuser 
   ChatUser.fromJson(Map<String, dynamic> json) {
     image = json['image'] ?? '';
     about = json['about'] ?? '';
@@ -32,6 +34,7 @@ class ChatUser {
     pushToken = json['push_token'] ?? '';
   }
 
+  //  this kind of converts the user defined object in out case chat user data to json 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
     data['image'] = image;

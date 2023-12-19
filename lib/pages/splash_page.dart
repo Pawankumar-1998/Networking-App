@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mymessages/main.dart';
 import 'package:mymessages/pages/auth/login_page.dart';
 import 'package:mymessages/pages/home_page.dart';
 
