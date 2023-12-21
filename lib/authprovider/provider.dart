@@ -3,17 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mymessages/models/chat_user.dart';
 
 class Providers {
-  // for authentication
+  // this is a authentication object used to authenticate the user  
   static FirebaseAuth auth = FirebaseAuth.instance;
 
-  // for the cloud fire base
+  // this is a firestore object used to read and write into database 
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
+  
+  // for getting the current user in the firebase auth instance
+  static User get user => auth.currentUser!;
 
   // this is used to store the current user
   static late ChatUser currentUser;
 
-  // for getting the current user
-  static User get user => auth.currentUser!;
 
   // function for checking if the user exist or not
   static Future<bool> userExists() async {
@@ -59,6 +60,14 @@ class Providers {
       } else {
         await Providers.createUser().then((user) => currentUserInfo());
       }
+    });
+  }
+
+  //  this function is used for updating the user info
+  static Future<void> updateCurrentUserInfo() async {
+    await firestore.collection('users').doc(user.uid).update({
+      'name': currentUser.name,
+      'about': currentUser.about,
     });
   }
 }
