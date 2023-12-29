@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mymessages/firebase_options.dart';
 import 'package:mymessages/pages/splash_page.dart';
 
+
 late Size mq;
 
 void main() {

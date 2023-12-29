@@ -1,6 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/helper/dialog_box.dart';
 import 'package:mymessages/models/chat_user.dart';
@@ -19,6 +26,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   // every form needs a key to validate and the form state give functionalities to save and validate form
   final _formKey = GlobalKey<FormState>();
+
+  String? _image;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +58,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     });
                   },
                 );
-                // ignore: use_build_context_synchronously
                 Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (_) => const LoginPage()));
               },
@@ -64,30 +72,45 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 children: [
                   SizedBox(height: mq.height * .03),
-                  // for the user profile
+                  // using the stack to place one widget upon another
                   Stack(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(mq.height * .1),
-                        child: CachedNetworkImage(
-                          // color: Colors.amber,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.fill,
-                          imageUrl: widget.user.image,
-                          placeholder: (context, url) =>
-                              const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.person),
-                        ),
-                      ),
+                      //  this comes below for the profile pic
+                      _image != null
+                          ? ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(mq.height * .1),
+                              child: Image.file(
+                                File(_image!),
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(mq.height * .1),
+                              child: CachedNetworkImage(
+                                width: 150,
+                                height: 150,
+                                fit: BoxFit.cover,
+                                imageUrl: widget.user.image,
+                                errorWidget: (context, url, error) =>
+                                    const CircleAvatar(
+                                  child: Icon(CupertinoIcons.person),
+                                ),
+                              ),
+                            ),
+                      // this widget comes above thisis edit button for profle
                       Positioned(
                         bottom: 0,
                         right: -25,
                         child: MaterialButton(
                           color: Colors.red,
                           shape: const CircleBorder(),
-                          onPressed: () {},
+                          onPressed: () {
+                            _showBottomSheet();
+                          },
                           child: Icon(
                             Icons.edit,
                             color: Colors.amber.shade500,
@@ -165,6 +188,79 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           )),
+    );
+  }
+
+  // this function is for calling the bottom model
+  void _showBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      builder: (_) {
+        return ListView(
+          shrinkWrap: true,
+          padding:
+              EdgeInsets.only(top: mq.height * .03, bottom: mq.height * .03),
+          children: [
+            const Text(
+              'Select Image',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // this button is for selecting the image
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: const CircleBorder(),
+                        fixedSize: Size(mq.width * .3, mq.height * .15)),
+                    onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
+                      // Pick an image.
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.gallery);
+                      if (image != null) {
+                        log('image path : ${image.path}  --- meme type : ${image.mimeType}');
+                        setState(() {
+                          _image = image.path;
+                        });
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Image.asset('assets/icon/addimage.png')),
+
+                // this button is for camera purpose
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: const CircleBorder(),
+                        fixedSize: Size(mq.width * .3, mq.height * .15)),
+                    onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
+                      // Pick an image.
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.camera);
+                      if (image != null) {
+                        log('image path : ${image.path}  --- meme type : ${image.mimeType}');
+                        setState(() {
+                          _image = image.path;
+                        });
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Image.asset('assets/icon/camera.png'))
+              ],
+            )
+          ],
+        );
+      },
     );
   }
 }
