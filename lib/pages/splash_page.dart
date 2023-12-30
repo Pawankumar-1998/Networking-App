@@ -46,14 +46,14 @@ class _SplashPageState extends State<SplashPage> {
       // ),
       body: Stack(
         children: [
-          // in the stack this is the first positioned element
+          // in the stack this is the first positioned element this stays below
           Positioned(
             top: mq.height * .15,
             right: mq.width * .25,
             width: mq.width * .5,
             child: Image.asset('assets/icon/chat.png'),
           ),
-          // in the stack this is the second positioned element
+          // in the stack this is the second positioned element the stays on top 
           Positioned(
             bottom: mq.height * .15,
             width: mq.width,

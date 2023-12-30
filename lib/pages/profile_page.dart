@@ -133,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextFormField(
                     initialValue: widget.user.name,
                     onSaved: (newValue) =>
-                        Providers.currentUser.name = newValue ?? '',
+                        Providers.currentChatUser.name = newValue ?? '',
                     validator: (value) => value != null && value.isNotEmpty
                         ? null
                         : 'Invalid username',
@@ -150,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextFormField(
                     initialValue: widget.user.about,
                     onSaved: (newValue) =>
-                        Providers.currentUser.about = newValue ?? '',
+                        Providers.currentChatUser.about = newValue ?? '',
                     validator: (value) => value != null && value.isNotEmpty
                         ? null
                         : 'Invalid-About',
@@ -224,13 +224,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
                       // Pick an image.
-                      final XFile? image =
-                          await picker.pickImage(source: ImageSource.gallery);
+                      final XFile? image = await picker.pickImage(
+                          source: ImageSource.gallery, imageQuality: 80);
                       if (image != null) {
                         log('image path : ${image.path}  --- meme type : ${image.mimeType}');
                         setState(() {
                           _image = image.path;
                         });
+
+                        // calling the function to update the profile pic
+                        Providers.updateProfilePicture(File(_image!));
                         Navigator.pop(context);
                       }
                     },
@@ -245,13 +248,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
                       // Pick an image.
-                      final XFile? image =
-                          await picker.pickImage(source: ImageSource.camera);
+                      final XFile? image = await picker.pickImage(
+                          source: ImageSource.camera, imageQuality: 80);
                       if (image != null) {
                         log('image path : ${image.path}  --- meme type : ${image.mimeType}');
                         setState(() {
                           _image = image.path;
                         });
+                        Providers.updateProfilePicture(File(_image!));
+
                         Navigator.pop(context);
                       }
                     },

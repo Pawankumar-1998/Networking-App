@@ -7,7 +7,6 @@ import 'package:mymessages/helper/dialog_box.dart';
 import 'package:mymessages/main.dart';
 import 'package:mymessages/pages/home_page.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -50,17 +49,16 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
   }
-  
 
   // function for google login
   Future<UserCredential?> _signInWithGoogle() async {
     try {
       await InternetAddress.lookup('www.google.com');
-        // Initiates the Google Sign-In process, prompting the user to select their Google account.
-        // Returns a GoogleSignInAccount object representing the signed-in Google account. This object may be null if the user cancels the sign-in process. 
+      // Initiates the Google Sign-In process, prompting the user to select their Google account.
+      // Returns a GoogleSignInAccount object representing the signed-in Google account. This object may be null if the user cancels the sign-in process.
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-      ///Retrieves the authentication details (tokens) associated with the signed-in Google account.  
+      ///Retrieves the authentication details (tokens) associated with the signed-in Google account.
       /// Returns a GoogleSignInAuthentication object containing an access token (accessToken) and an ID token (idToken).
       final GoogleSignInAuthentication? googleAuth =
           await googleUser?.authentication;
@@ -90,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Stack(
         children: [
-          // in the stack this is the first positioned element
+          // in the stack this is the first positioned element this stays below
           AnimatedPositioned(
             top: mq.height * .15,
             right: isAnimated ? mq.width * .25 : mq.width * -5,

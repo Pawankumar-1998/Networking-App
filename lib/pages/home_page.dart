@@ -90,7 +90,8 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => ProfilePage(user: Providers.currentUser),
+                      builder: (_) =>
+                          ProfilePage(user: Providers.currentChatUser),
                     ));
                   },
                   icon: const Icon(Icons.people_alt)),
