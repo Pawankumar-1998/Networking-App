@@ -16,8 +16,8 @@ import 'package:mymessages/pages/auth/login_page.dart';
 import '../main.dart';
 
 class ProfilePage extends StatefulWidget {
-  final ChatUser user;
-  const ProfilePage({super.key, required this.user});
+  final ChatUser chatUser;
+  const ProfilePage({super.key, required this.chatUser});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -44,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
               backgroundColor: Colors.redAccent,
               onPressed: () async {
                 Dialogs.showProgressBar(context);
-                await Providers.auth.signOut().then(
+                await Providers.fbAuthObj.signOut().then(
                   (value) async {
                     await GoogleSignIn().signOut().then((value) {
                       // pops the progress bar
@@ -76,6 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Stack(
                     children: [
                       //  this comes below for the profile pic
+                      // if the _image is not null means the image is comming from the device path
                       _image != null
                           ? ClipRRect(
                               borderRadius:
@@ -87,6 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fit: BoxFit.cover,
                               ),
                             )
+                          // if the image is null then the image is coming from the Chat user
                           : ClipRRect(
                               borderRadius:
                                   BorderRadius.circular(mq.height * .1),
@@ -94,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 width: 150,
                                 height: 150,
                                 fit: BoxFit.cover,
-                                imageUrl: widget.user.image,
+                                imageUrl: widget.chatUser.image,
                                 errorWidget: (context, url, error) =>
                                     const CircleAvatar(
                                   child: Icon(CupertinoIcons.person),
@@ -123,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // for the email
                   SizedBox(height: mq.height * .03),
                   Text(
-                    widget.user.email,
+                    widget.chatUser.email,
                     style: const TextStyle(fontSize: 20, color: Colors.black54),
                   ),
 
@@ -131,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: mq.height * .03),
 
                   TextFormField(
-                    initialValue: widget.user.name,
+                    initialValue: widget.chatUser.name,
                     onSaved: (newValue) =>
                         Providers.currentChatUser.name = newValue ?? '',
                     validator: (value) => value != null && value.isNotEmpty
@@ -148,14 +150,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: mq.height * .02),
 
                   TextFormField(
-                    initialValue: widget.user.about,
+                    initialValue: widget.chatUser.about,
                     onSaved: (newValue) =>
                         Providers.currentChatUser.about = newValue ?? '',
                     validator: (value) => value != null && value.isNotEmpty
                         ? null
                         : 'Invalid-About',
                     decoration: const InputDecoration(
-                      label: Text('Hey i am using we chat!'),
+                      label: Text('About'),
                       prefixIcon: Icon(Icons.info),
                       border: OutlineInputBorder(),
                     ),
@@ -215,7 +217,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // this button is for selecting the image
+                // this button is for selecting the image from thr gallery
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

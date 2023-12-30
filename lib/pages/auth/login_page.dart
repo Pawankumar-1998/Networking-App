@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       // Once signed in, return the UserCredential
-      return await Providers.auth.signInWithCredential(credential);
+      return await Providers.fbAuthObj.signInWithCredential(credential);
     } catch (e) {
       // ignore: use_build_context_synchronously
       Dialogs.showSnackbar(context, 'Please chek your internet connection');

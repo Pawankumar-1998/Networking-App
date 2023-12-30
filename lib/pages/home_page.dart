@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) =>
-                          ProfilePage(user: Providers.currentChatUser),
+                          ProfilePage(chatUser: Providers.currentChatUser),
                     ));
                   },
                   icon: const Icon(Icons.people_alt)),
@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.only(bottom: 20),
             child: FloatingActionButton(
               onPressed: () async {
-                await Providers.auth.signOut();
+                await Providers.fbAuthObj.signOut();
                 await GoogleSignIn().signOut();
               },
               child: const Icon(Icons.add_comment_rounded),
