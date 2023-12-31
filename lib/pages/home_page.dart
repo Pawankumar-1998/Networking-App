@@ -134,7 +134,8 @@ class _HomePageState extends State<HomePage> {
                     itemCount: _isSearching ? _searchList.length : _list.length,
                     itemBuilder: (context, index) {
                       return ChatUserCard(
-                        user: _isSearching ? _searchList[index] : _list[index],
+                        chatUser:
+                            _isSearching ? _searchList[index] : _list[index],
                       );
                     },
                   );
