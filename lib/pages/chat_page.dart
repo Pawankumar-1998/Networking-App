@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/models/chat_user.dart';
 
 import '../main.dart';
@@ -23,6 +27,44 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         body: Column(
           children: [
+            // this is for the messaging area where the user can see messages
+            Expanded(
+              child: StreamBuilder(
+                stream: Providers.getMessages(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                    case ConnectionState.none:
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    case ConnectionState.active:
+                    case ConnectionState.done:
+                      final messageData = snapshot.data?.docs;
+                      log('Data ${jsonEncode(messageData![0].data())}');
+
+                      final list = ['Pawan', 'Kumar'];
+
+                      if (list.isNotEmpty) {
+                        return ListView.builder(
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            return Text('Message ${list[index]}');
+                          },
+                        );
+                      } else {
+                        return const Center(
+                          child: Text(
+                            'No Messages available',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        );
+                      }
+                  }
+                },
+              ),
+            ),
+            //  chat input where the user types the message
             _chatInput(),
           ],
         ),

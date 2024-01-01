@@ -24,7 +24,10 @@ class Providers {
 
   // function for checking if the user exist or not
   static Future<bool> userExists() async {
-    return (await fbFirestoreObj.collection('users').doc(googleAuthUser.uid).get())
+    return (await fbFirestoreObj
+            .collection('users')
+            .doc(googleAuthUser.uid)
+            .get())
         .exists;
   }
 
@@ -90,12 +93,13 @@ class Providers {
     final ext = file.path.split('.').last;
     log('Extension : $ext');
 
-      //  the below ref contains the address of the firebase storage folder 
-    final ref =
-        fbStorageObj.ref().child('profile_picture / ${googleAuthUser.uid}.$ext');
+    //  the below ref contains the address of the firebase storage folder
+    final ref = fbStorageObj
+        .ref()
+        .child('profile_picture / ${googleAuthUser.uid}.$ext');
 
-    // this line of code ios used for uploading the file it line go to the address and put the image there 
-    //  and set the meta data 
+    // this line of code ios used for uploading the file it line go to the address and put the image there
+    //  and set the meta data
     await ref
         .putFile(file, SettableMetadata(contentType: 'image/$ext'))
         .then((p0) {
@@ -110,5 +114,10 @@ class Providers {
         .collection('users')
         .doc(googleAuthUser.uid)
         .update({'image': currentChatUser.image});
+  }
+
+  /// the below codes are for the chat messages
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMessages() {
+    return fbFirestoreObj.collection('messages').snapshots();
   }
 }
