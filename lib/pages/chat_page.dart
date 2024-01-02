@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mymessages/authprovider/provider.dart';
@@ -10,8 +8,8 @@ import 'package:mymessages/widgets/message_card.dart';
 import '../main.dart';
 
 class ChatScreen extends StatefulWidget {
-  final ChatUser chatUser;
-  const ChatScreen({super.key, required this.chatUser});
+  final ChatUser chatUserOpp;
+  const ChatScreen({super.key, required this.chatUserOpp});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -19,6 +17,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   List<Message> messageList = [];
+  final textController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -33,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
             // this is for the messaging area where the user can see messages
             Expanded(
               child: StreamBuilder(
-                stream: Providers.getMessages(),
+                stream: Providers.getMessages(widget.chatUserOpp),
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
@@ -48,30 +47,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       /// snapshot and store in the messageData variable
                       final messageData = snapshot.data?.docs;
 
-                      log('Data ${jsonEncode(messageData![0].data())}');
+                      // log('Data ${jsonEncode(messageData![0].data())}');
+                      messageList = messageData
+                              ?.map((e) => Message.fromJson(e.data()))
+                              .toList() ??
+                          [];
 
-                      /// ----------------------------------------------------------------
-                      ///  for testin shake building the dummy list
-                      // List 1
-                      messageList.clear();
-                      messageList.add(Message(
-                          toId: 'opp user ',
-                          msg: 'Hii pawan',
-                          read: '',
-                          type: Type.text,
-                          fromId: Providers.googleAuthUser.uid,
-                          sent: '12:00'));
-
-                      // list 2
-                      messageList.add(Message(
-                          toId: Providers.googleAuthUser.uid,
-                          msg: 'Hello Devloper',
-                          read: '',
-                          type: Type.text,
-                          fromId: 'opp user',
-                          sent: '12:00'));
-
-                      /// ----------------------------------------------------------------
                       if (messageList.isNotEmpty) {
                         return ListView.builder(
                           itemCount: messageList.length,
@@ -121,7 +102,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: CachedNetworkImage(
               width: mq.height * .05,
               height: mq.height * .05,
-              imageUrl: widget.chatUser.image,
+              imageUrl: widget.chatUserOpp.image,
               placeholder: (context, url) => const CircularProgressIndicator(),
               errorWidget: (context, url, error) => const Icon(Icons.person),
             ),
@@ -136,7 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               // for name
               Text(
-                widget.chatUser.name,
+                widget.chatUserOpp.name,
                 style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 20,
@@ -180,11 +161,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       )),
 
                   // this is for the text field
-                  const Expanded(
+                  Expanded(
                       child: TextField(
+                    controller: textController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Enter a message',
                       hintStyle: TextStyle(color: Colors.blueAccent),
                       border: InputBorder.none,
@@ -216,7 +198,12 @@ class _ChatScreenState extends State<ChatScreen> {
             minWidth: 0,
             padding:
                 const EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 10),
-            onPressed: () {},
+            onPressed: () {
+              if (textController.text.isNotEmpty) {
+                Providers.sendMessage(widget.chatUserOpp, textController.text);
+                textController.text = '';
+              }
+            },
             shape: const CircleBorder(),
             color: Colors.green,
             child: const Icon(Icons.send, size: 28, color: Colors.white),

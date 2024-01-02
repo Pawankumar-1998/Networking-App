@@ -23,7 +23,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Providers.currentUserInfo();
+    Providers
+        .currentUserInfo(); // this fetches the user document in firebase or creates the user document  if does not exits
   }
 
   @override
@@ -134,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                     itemCount: _isSearching ? _searchList.length : _list.length,
                     itemBuilder: (context, index) {
                       return ChatUserCard(
-                        chatUser:
+                        chatUserOpp:
                             _isSearching ? _searchList[index] : _list[index],
                       );
                     },

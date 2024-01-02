@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mymessages/models/chat_user.dart';
+import 'package:mymessages/models/message.dart';
 
 class Providers {
   // this is a authentication object used to authenticate the user
@@ -117,7 +118,40 @@ class Providers {
   }
 
   /// the below codes are for the chat messages
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getMessages() {
-    return fbFirestoreObj.collection('messages').snapshots();
+
+  // this below function generaters a unique conversation id for a two user converstation
+  static String getUniqueConversationId(String oppUserId) =>
+      googleAuthUser.uid.hashCode <= oppUserId.hashCode
+          ? '${googleAuthUser.uid}_$oppUserId'
+          : '${oppUserId}_${googleAuthUser.uid}';
+
+  //  this function is used for getting all the messages documents of a specific chat (chatUser)
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMessages(
+      ChatUser chatUserOpp) {
+    return fbFirestoreObj
+        .collection('chats/${getUniqueConversationId(chatUserOpp.id)}/messages/')
+        .snapshots();
+  }
+
+  //  this below function is used to send the messages (chatUser)
+  static Future<void> sendMessage(ChatUser chatUserOpp, String msg) async {
+    //  this gives the time when the document ( message) is send and we are going to use the time as document id of the message
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // this is the message that needs to be send
+    final Message message = Message(
+        toId: chatUserOpp.id,
+        msg: msg,
+        read: '',
+        type: Type.text,
+        fromId: googleAuthUser.uid,
+        sent: time);
+
+    // this gets the location or the address where the chat document needs to be stored
+    final ref = fbFirestoreObj
+        .collection('chats/${getUniqueConversationId(chatUserOpp.id)}/messages/');
+
+    // this is putting the data/ document in the address which ref is pointing
+    await ref.doc(time).set(message.toJson());
   }
 }

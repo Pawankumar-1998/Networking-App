@@ -5,9 +5,9 @@ import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/pages/chat_page.dart';
 
 class ChatUserCard extends StatefulWidget {
-  // this user contains all the details of the Chat user
-  final ChatUser chatUser;
-  const ChatUserCard({super.key, required this.chatUser});
+  // this user contains all the details of the opposite Chat user
+  final ChatUser chatUserOpp;
+  const ChatUserCard({super.key, required this.chatUserOpp});
 
   @override
   State<ChatUserCard> createState() => _ChatUserCardState();
@@ -25,7 +25,7 @@ class _ChatUserCardState extends State<ChatUserCard> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => ChatScreen(chatUser: widget.chatUser),
+                builder: (_) => ChatScreen(chatUserOpp: widget.chatUserOpp),
               ));
         },
         child: ListTile(
@@ -34,14 +34,14 @@ class _ChatUserCardState extends State<ChatUserCard> {
               child: CachedNetworkImage(
                 width: mq.height * .055,
                 height: mq.height * .055,
-                imageUrl: widget.chatUser.image,
+                imageUrl: widget.chatUserOpp.image,
                 placeholder: (context, url) =>
                     const CircularProgressIndicator(),
                 errorWidget: (context, url, error) => const Icon(Icons.person),
               ),
             ),
-            title: Text(widget.chatUser.name),
-            subtitle: Text(widget.chatUser.about, maxLines: 1),
+            title: Text(widget.chatUserOpp.name),
+            subtitle: Text(widget.chatUserOpp.about, maxLines: 1),
             trailing:
                 // const Text('12:30', style: TextStyle(color: Colors.black54)),
                 Container(
