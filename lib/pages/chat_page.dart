@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/models/chat_user.dart';
+import 'package:mymessages/models/message.dart';
+import 'package:mymessages/widgets/message_card.dart';
 
 import '../main.dart';
 
@@ -17,6 +18,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  List<Message> messageList = [];
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -25,6 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
           automaticallyImplyLeading: false,
           flexibleSpace: _appBar(),
         ),
+        backgroundColor: const Color.fromARGB(255, 203, 233, 247),
         body: Column(
           children: [
             // this is for the messaging area where the user can see messages
@@ -40,16 +43,43 @@ class _ChatScreenState extends State<ChatScreen> {
                       );
                     case ConnectionState.active:
                     case ConnectionState.done:
+
+                      /// snapshot has the bundle of document get all the document from the
+                      /// snapshot and store in the messageData variable
                       final messageData = snapshot.data?.docs;
+
                       log('Data ${jsonEncode(messageData![0].data())}');
 
-                      final list = ['Pawan', 'Kumar'];
+                      /// ----------------------------------------------------------------
+                      ///  for testin shake building the dummy list
+                      // List 1
+                      messageList.clear();
+                      messageList.add(Message(
+                          toId: 'opp user ',
+                          msg: 'Hii pawan',
+                          read: '',
+                          type: Type.text,
+                          fromId: Providers.googleAuthUser.uid,
+                          sent: '12:00'));
 
-                      if (list.isNotEmpty) {
+                      // list 2
+                      messageList.add(Message(
+                          toId: Providers.googleAuthUser.uid,
+                          msg: 'Hello Devloper',
+                          read: '',
+                          type: Type.text,
+                          fromId: 'opp user',
+                          sent: '12:00'));
+
+                      /// ----------------------------------------------------------------
+                      if (messageList.isNotEmpty) {
                         return ListView.builder(
-                          itemCount: list.length,
+                          itemCount: messageList.length,
+                          padding: EdgeInsets.only(top: mq.height * .01),
                           itemBuilder: (context, index) {
-                            return Text('Message ${list[index]}');
+                            return MessageCard(
+                              message: messageList[index],
+                            );
                           },
                         );
                       } else {
