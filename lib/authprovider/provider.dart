@@ -125,7 +125,7 @@ class Providers {
           ? '${googleAuthUser.uid}_$oppUserId'
           : '${oppUserId}_${googleAuthUser.uid}';
 
-  //  this function is used for getting all the messages documents of a specific chat (chatUser)
+  //  this function is used for getting all the messages documents of a specific chat (chatUser) .
   static Stream<QuerySnapshot<Map<String, dynamic>>> getMessages(
       ChatUser chatUserOpp) {
     return fbFirestoreObj
