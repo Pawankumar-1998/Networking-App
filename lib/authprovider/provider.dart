@@ -23,7 +23,7 @@ class Providers {
   // this is used to store the current user
   static late ChatUser currentChatUser;
 
-  // function for checking if the user exist or not
+  // function for checking if the user exist or not in db
   static Future<bool> userExists() async {
     return (await fbFirestoreObj
             .collection('users')
