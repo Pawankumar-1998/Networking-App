@@ -44,8 +44,7 @@ class _MessageCardState extends State<MessageCard> {
                     bottomRight: Radius.circular(20)),
                 border: Border.all(color: Colors.lightBlue)),
             child: Text(
-              MyDateUtil.getFormattedTime(
-                  context: context, time: widget.message.sent),
+              widget.message.msg,
               style: const TextStyle(color: Colors.black87, fontSize: 16),
             ),
           ),
@@ -55,7 +54,8 @@ class _MessageCardState extends State<MessageCard> {
         Padding(
           padding: EdgeInsets.only(right: mq.width * .04),
           child: Text(
-            widget.message.sent,
+            MyDateUtil.getFormattedTime(
+                context: context, time: widget.message.sent),
             style: const TextStyle(color: Colors.black54, fontSize: 15),
           ),
         )
