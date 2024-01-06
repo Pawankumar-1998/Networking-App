@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/helper/my_date_util.dart';
 import 'package:mymessages/main.dart';
 import 'package:mymessages/models/message.dart';
 
@@ -22,6 +23,10 @@ class _MessageCardState extends State<MessageCard> {
 
   //  for opposite person message
   Widget _blueMessage() {
+    // update the read status if the auth user and the owner of the message document is different
+    if (widget.message.read.isEmpty) {
+      Providers.updateMessageReadStatus(message: widget.message);
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -39,7 +44,8 @@ class _MessageCardState extends State<MessageCard> {
                     bottomRight: Radius.circular(20)),
                 border: Border.all(color: Colors.lightBlue)),
             child: Text(
-              widget.message.msg,
+              MyDateUtil.getFormattedTime(
+                  context: context, time: widget.message.sent),
               style: const TextStyle(color: Colors.black87, fontSize: 16),
             ),
           ),
@@ -57,7 +63,7 @@ class _MessageCardState extends State<MessageCard> {
     );
   }
 
-  //  for out own message
+  //  for our own message
   Widget _greenMessage() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,19 +76,21 @@ class _MessageCardState extends State<MessageCard> {
               width: mq.width * .02,
             ),
             //  for the double tick
-            const Icon(
-              Icons.done_all_rounded,
-              color: Colors.blue,
-            ),
+            if (widget.message.read.isNotEmpty)
+              const Icon(
+                Icons.done_all_rounded,
+                color: Colors.blue,
+              ),
             // for space
             SizedBox(
               width: mq.width * .02,
             ),
             // for time
-            Text(widget.message.sent),
+            Text(MyDateUtil.getFormattedTime(
+                context: context, time: widget.message.sent)),
           ],
         ),
-        //  this for the message content
+        //  this for the message content flixible is used because as the content of the message increese  the container which is flexible also increases
         Flexible(
           child: Container(
             margin: EdgeInsets.symmetric(

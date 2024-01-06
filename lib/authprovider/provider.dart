@@ -129,7 +129,8 @@ class Providers {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getMessages(
       ChatUser chatUserOpp) {
     return fbFirestoreObj
-        .collection('chats/${getUniqueConversationId(chatUserOpp.id)}/messages/')
+        .collection(
+            'chats/${getUniqueConversationId(chatUserOpp.id)}/messages/')
         .snapshots();
   }
 
@@ -148,10 +149,19 @@ class Providers {
         sent: time);
 
     // this gets the location or the address where the chat document needs to be stored
-    final ref = fbFirestoreObj
-        .collection('chats/${getUniqueConversationId(chatUserOpp.id)}/messages/');
+    final ref = fbFirestoreObj.collection(
+        'chats/${getUniqueConversationId(chatUserOpp.id)}/messages/');
 
     // this is putting the data/ document in the address which ref is pointing
     await ref.doc(time).set(message.toJson());
+  }
+
+  // this below function is used for setting the blue tick or sets as message has been seen by the oppsite user in the Green messages
+  static Future<void> updateMessageReadStatus({required Message message}) async {
+    fbFirestoreObj
+        .collection(
+            'chats/${getUniqueConversationId(message.fromId)}/messages/')
+        .doc(message.sent)
+        .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
   }
 }

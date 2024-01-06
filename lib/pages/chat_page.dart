@@ -2,12 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/models/chat_user.dart';
-import 'package:mymessages/models/message.dart';
+import 'package:mymessages/models/message.dart';                    
 import 'package:mymessages/widgets/message_card.dart';
 
 import '../main.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends StatefulWidget {    
   final ChatUser chatUserOpp;
   const ChatScreen({super.key, required this.chatUserOpp});
 
