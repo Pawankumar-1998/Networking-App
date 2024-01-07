@@ -157,11 +157,23 @@ class Providers {
   }
 
   // this below function is used for setting the blue tick or sets as message has been seen by the oppsite user in the Green messages
-  static Future<void> updateMessageReadStatus({required Message message}) async {
+  static Future<void> updateMessageReadStatus(
+      {required Message message}) async {
     fbFirestoreObj
         .collection(
             'chats/${getUniqueConversationId(message.fromId)}/messages/')
         .doc(message.sent)
         .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
+  }
+
+  // this function below is used to show the last message of the converstation ]
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessage(
+      ChatUser chatUserOpp) {
+    return fbFirestoreObj
+        .collection(
+            'chats/${getUniqueConversationId(chatUserOpp.id)}/messages/')
+        .orderBy('sent', descending: true)
+        .limit(1)
+        .snapshots();
   }
 }

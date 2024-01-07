@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
         idToken: googleAuth?.idToken,
       );
 
-      // Once signed in, return the UserCredential
+      // Once signed in, returns a google auth user which contains details like Uid and ect.
       return await Providers.fbAuthObj.signInWithCredential(credential);
     } catch (e) {
       // ignore: use_build_context_synchronously
