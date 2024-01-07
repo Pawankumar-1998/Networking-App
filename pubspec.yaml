@@ -43,6 +43,7 @@ dependencies:
   cached_network_image: ^3.3.0
   image_picker: ^1.0.5
   firebase_storage: ^11.5.6
+  emoji_picker_flutter: ^1.6.3
 
 dev_dependencies:
   flutter_test:

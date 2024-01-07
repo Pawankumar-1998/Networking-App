@@ -1,13 +1,16 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/models/chat_user.dart';
-import 'package:mymessages/models/message.dart';                    
+import 'package:mymessages/models/message.dart';
 import 'package:mymessages/widgets/message_card.dart';
 
 import '../main.dart';
 
-class ChatScreen extends StatefulWidget {    
+class ChatScreen extends StatefulWidget {
   final ChatUser chatUserOpp;
   const ChatScreen({super.key, required this.chatUserOpp});
 
@@ -15,69 +18,100 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {                                                                                
+class _ChatScreenState extends State<ChatScreen> {
+  //  for storing list of messages
   List<Message> messageList = [];
+  //  to store the text in the the text editing controller
   final textController = TextEditingController();
+  //  for the emoji
+  bool showEmoji = false;
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          flexibleSpace: _appBar(),
-        ),
-        backgroundColor: const Color.fromARGB(255, 203, 233, 247),
-        body: Column(
-          children: [
-            // this is for the messaging area where the user can see messages
-            Expanded(
-              child: StreamBuilder(
-                stream: Providers.getMessages(widget.chatUserOpp),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    case ConnectionState.active:
-                    case ConnectionState.done:
-
-                      /// snapshot has the bundle of document get all the document from the
-                      /// snapshot and store in the messageData variable
-                      final messageData = snapshot.data?.docs;
-
-                      // log('Data ${jsonEncode(messageData![0].data())}');
-                      messageList = messageData
-                              ?.map((e) => Message.fromJson(e.data()))
-                              .toList() ??
-                          [];
-
-                      if (messageList.isNotEmpty) {
-                        return ListView.builder(
-                          itemCount: messageList.length,
-                          padding: EdgeInsets.only(top: mq.height * .01),
-                          itemBuilder: (context, index) {
-                            return MessageCard(
-                              message: messageList[index],
-                            );
-                          },
-                        );
-                      } else {
-                        return const Center(
-                          child: Text(
-                            'No Messages available',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        );
-                      }
-                  }
-                },
-              ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: WillPopScope(
+          onWillPop: () {
+            if (showEmoji) { 
+              setState(() {
+                showEmoji = !showEmoji;
+              });
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              flexibleSpace: _appBar(),
             ),
-            //  chat input where the user types the message
-            _chatInput(),
-          ],
+            backgroundColor: const Color.fromARGB(255, 203, 233, 247),
+            body: Column(
+              children: [
+                // this is for the messaging area where the user can see messages
+                Expanded(
+                  child: StreamBuilder(
+                    stream: Providers.getMessages(widget.chatUserOpp),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+
+                          /// snapshot has the bundle of document get all the document from the
+                          /// snapshot and store in the messageData variable
+                          final messageData = snapshot.data?.docs;
+
+                          // log('Data ${jsonEncode(messageData![0].data())}');
+                          messageList = messageData
+                                  ?.map((e) => Message.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+
+                          if (messageList.isNotEmpty) {
+                            return ListView.builder(
+                              itemCount: messageList.length,
+                              padding: EdgeInsets.only(top: mq.height * .01),
+                              itemBuilder: (context, index) {
+                                return MessageCard(
+                                  message: messageList[index],
+                                );
+                              },
+                            );
+                          } else {
+                            return const Center(
+                              child: Text(
+                                'No Messages available',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            );
+                          }
+                      }
+                    },
+                  ),
+                ),
+                //  chat input where the user types the message
+                _chatInput(),
+                //  the below lines will be for the emoji section
+                if (showEmoji)
+                  SizedBox(
+                    height: mq.height * 0.35,
+                    child: EmojiPicker(
+                      textEditingController: textController,
+                      config: Config(
+                        columns: 7,
+                        emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -154,7 +188,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   // for emoji
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          showEmoji = !showEmoji;
+                        });
+                      },
                       icon: const Icon(
                         Icons.emoji_emotions,
                         color: Colors.blueAccent,
@@ -166,6 +205,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     controller: textController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
+                    onTap: () {
+                      if (showEmoji) {
+                        setState(() {
+                          showEmoji = !showEmoji;
+                        });
+                      }
+                    },
                     decoration: const InputDecoration(
                       hintText: 'Enter a message',
                       hintStyle: TextStyle(color: Colors.blueAccent),

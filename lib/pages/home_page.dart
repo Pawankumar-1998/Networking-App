@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                   case ConnectionState.done:
                     final data = snapshot.data?.docs;
                     _list = data
-                            ?.map((e) => ChatUser.fromJson(e.data()))
+                            ?.map((singleDocument) => ChatUser.fromJson(singleDocument.data()))
                             .toList() ??
                         [];
                 }
