@@ -49,10 +49,11 @@ class _ChatUserCardState extends State<ChatUserCard> {
               return ListTile(
                   //  image or profile pic of the user
                   leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(mq.height * .3),
+                    borderRadius: BorderRadius.circular(mq.height * .4),
                     child: CachedNetworkImage(
-                      width: mq.height * .055,
-                      height: mq.height * .055,
+                      width: mq.width * .12,
+                      height: mq.height * .1,
+                      fit: BoxFit.fill,
                       imageUrl: widget.chatUserOpp.image,
                       placeholder: (context, url) =>
                           const CircularProgressIndicator(),
@@ -64,7 +65,11 @@ class _ChatUserCardState extends State<ChatUserCard> {
                   title: Text(widget.chatUserOpp.name),
                   //  status of the opp user or the last message of the conversation
                   subtitle: Text(
-                      message != null ? message!.msg : widget.chatUserOpp.about,
+                      message != null
+                          ? message!.type == Type.image
+                              ? 'image'
+                              : message!.msg
+                          : widget.chatUserOpp.about,
                       maxLines: 1),
                   // green dot for  online
                   trailing: message == null

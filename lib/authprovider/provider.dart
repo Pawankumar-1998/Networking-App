@@ -131,6 +131,7 @@ class Providers {
     return fbFirestoreObj
         .collection(
             'chats/${getUniqueConversationId(chatUserOpp.id)}/messages/')
+        .orderBy('sent', descending: true)
         .snapshots();
   }
 
@@ -198,10 +199,9 @@ class Providers {
     });
 
 // this is for getting the url of the image
-    final imageUrl =
-        await ref.getDownloadURL(); 
+    final imageUrl = await ref.getDownloadURL();
 
-// updating the message document with image url to the msg attribute of the messagw document 
+// updating the message document with image url to the msg attribute of the messagw document
     await sendMessage(chatUserOpp, imageUrl, Type.image);
   }
 }
