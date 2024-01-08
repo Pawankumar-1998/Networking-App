@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/helper/my_date_util.dart';
@@ -33,26 +34,41 @@ class _MessageCardState extends State<MessageCard> {
         //  first child message
         Flexible(
           child: Container(
-            padding: EdgeInsets.all(mq.width * .04),
-            margin: EdgeInsets.symmetric(
-                horizontal: mq.width * .04, vertical: mq.height * .01),
-            decoration: BoxDecoration(
-                color: Colors.blue.shade100,
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                    bottomRight: Radius.circular(20)),
-                border: Border.all(color: Colors.lightBlue)),
-            child: Text(
-              widget.message.msg,
-              style: const TextStyle(color: Colors.black87, fontSize: 16),
-            ),
-          ),
+              padding: EdgeInsets.all(widget.message.type == Type.image
+                  ? mq.width * .03
+                  : mq.width * .04),
+              margin: EdgeInsets.symmetric(
+                  horizontal: mq.width * .04, vertical: mq.height * .01),
+              decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                      bottomRight: Radius.circular(20)),
+                  border: Border.all(color: Colors.lightBlue)),
+              child: widget.message.type == Type.text
+                  ? Text(
+                      widget.message.msg,
+                      style:
+                          const TextStyle(color: Colors.black87, fontSize: 16),
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: CachedNetworkImage(
+                        // width: mq.height * .05,
+                        // height: mq.height * .05,
+                        imageUrl: widget.message.msg,
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.image, size: 70),
+                      ),
+                    )),
         ),
 
         //  second child for time
         Padding(
-          padding: EdgeInsets.only(right: mq.width * .04),
+          padding: EdgeInsets.only(right: mq.width * .01),
           child: Text(
             MyDateUtil.getFormattedTime(
                 context: context, time: widget.message.sent),
@@ -93,23 +109,38 @@ class _MessageCardState extends State<MessageCard> {
         //  this for the message content flixible is used because as the content of the message increese  the container which is flexible also increases
         Flexible(
           child: Container(
-            margin: EdgeInsets.symmetric(
-                horizontal: mq.width * .04, vertical: mq.height * .01),
-            padding: EdgeInsets.all(mq.width * .04),
-            decoration: BoxDecoration(
-              color: Colors.lightGreen,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-                bottomLeft: Radius.circular(20),
+              margin: EdgeInsets.symmetric(
+                  horizontal: mq.width * .04, vertical: mq.height * .01),
+              padding: EdgeInsets.all(widget.message.type == Type.image
+                  ? mq.width * .03
+                  : mq.width * .04),
+              decoration: BoxDecoration(
+                color: Colors.lightGreen,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                ),
+                border: Border.all(color: Colors.green),
               ),
-              border: Border.all(color: Colors.green),
-            ),
-            child: Text(
-              widget.message.msg,
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-          ),
+              child: widget.message.type == Type.text
+                  ? Text(
+                      widget.message.msg,
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.black87),
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: CachedNetworkImage(
+                        // width: mq.height * .30,
+                        // height: mq.height * .30,
+                        imageUrl: widget.message.msg,
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.image, size: 70),
+                      ),
+                    )),
         )
       ],
     );

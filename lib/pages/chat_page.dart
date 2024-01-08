@@ -1,8 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/models/message.dart';
@@ -32,7 +34,7 @@ class _ChatScreenState extends State<ChatScreen> {
       child: SafeArea(
         child: WillPopScope(
           onWillPop: () {
-            if (showEmoji) { 
+            if (showEmoji) {
               setState(() {
                 showEmoji = !showEmoji;
               });
@@ -229,7 +231,17 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   // for camera
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        // Pick an image.
+                        final XFile? image = await picker.pickImage(
+                            source: ImageSource.camera, imageQuality: 60);
+                        if (image != null) {
+                          log('image path : ${image.path}  --- meme type : ${image.mimeType}');
+                          await Providers.sendImageAsMessage(
+                              widget.chatUserOpp, File(image.path));
+                        }
+                      },
                       icon: const Icon(
                         Icons.camera_alt,
                         color: Colors.blueAccent,
@@ -246,7 +258,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 const EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 10),
             onPressed: () {
               if (textController.text.isNotEmpty) {
-                Providers.sendMessage(widget.chatUserOpp, textController.text);
+                Providers.sendMessage(
+                    widget.chatUserOpp, textController.text, Type.text);
                 textController.text = '';
               }
             },

@@ -135,7 +135,8 @@ class Providers {
   }
 
   //  this below function is used to send the messages (chatUser)
-  static Future<void> sendMessage(ChatUser chatUserOpp, String msg) async {
+  static Future<void> sendMessage(
+      ChatUser chatUserOpp, String msg, Type type) async {
     //  this gives the time when the document ( message) is send and we are going to use the time as document id of the message
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -144,7 +145,7 @@ class Providers {
         toId: chatUserOpp.id,
         msg: msg,
         read: '',
-        type: Type.text,
+        type: type,
         fromId: googleAuthUser.uid,
         sent: time);
 
@@ -175,5 +176,32 @@ class Providers {
         .orderBy('sent', descending: true)
         .limit(1)
         .snapshots();
+  }
+
+  //  this function is used for sending the pic as an image
+  static Future<void> sendImageAsMessage(
+      ChatUser chatUserOpp, File file) async {
+    // for getting the image file extension
+    final ext = file.path.split('.').last;
+    log('Extension : $ext');
+
+    //  the below ref contains the address of the firebase storage folder
+    final ref = fbStorageObj.ref().child(
+        'images/${getUniqueConversationId(chatUserOpp.id)}/${DateTime.now().millisecondsSinceEpoch}.$ext');
+
+    // this line of code ios used for uploading the file it line go to the address and put the image there
+    //  and set the meta data
+    await ref
+        .putFile(file, SettableMetadata(contentType: 'image/$ext'))
+        .then((p0) {
+      log('Data transfered');
+    });
+
+// this is for getting the url of the image
+    final imageUrl =
+        await ref.getDownloadURL(); 
+
+// updating the message document with image url to the msg attribute of the messagw document 
+    await sendMessage(chatUserOpp, imageUrl, Type.image);
   }
 }
