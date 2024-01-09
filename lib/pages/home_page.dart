@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     Providers
-        .currentUserInfo(); // this fetches the user document in firebase or creates the user document  if does not exits
+        .currentUserExists(); // this fetches the user document in firebase or creates the user document  if does not exits
   }
 
   @override

@@ -61,4 +61,32 @@ class MyDateUtil {
     }
     return 'NA';
   }
+
+  //  this function is used for getting the user's last active time
+  static String getLastActiveTime(
+      {required BuildContext context, required String lastActive}) {
+    final int i = int.parse(lastActive)??-1;
+
+    //  if the time in user document is not available
+    if (i == -1) return 'Last seen not available';
+
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(i);
+    DateTime now = DateTime.now();
+
+    //  we are formatting time to get the hour and minute 
+    String formatedTime = TimeOfDay.fromDateTime(time).format(context);
+
+    if (time.day == now.day &&
+        time.month == now.month &&
+        time.year == now.year) {
+      return 'Last seen online at $formatedTime';
+    }
+
+    if ((now.difference(time).inHours / 24).round() == 1) {
+      return 'Last seen yestarday at $formatedTime';
+    }
+
+    String month = _getMonth(time);
+    return 'last seen on ${time.day} $month on $formatedTime';
+  }
 }

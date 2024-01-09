@@ -6,6 +6,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/helper/my_date_util.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/models/message.dart';
 import 'package:mymessages/widgets/message_card.dart';
@@ -23,10 +24,14 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   //  for storing list of messages
   List<Message> messageList = [];
+
+  List<ChatUser> listOfOppUserDocument = [];
   //  to store the text in the the text editing controller
   final textController = TextEditingController();
   //  for the emoji
   bool showEmoji = false;
+  //  for images uploading
+  bool imageIsUploading = false;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -98,6 +103,17 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
+                // this is for the loading effect when the images are uploading
+                if (imageIsUploading)
+                  const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )),
                 //  chat input where the user types the message
                 _chatInput(),
                 //  the below lines will be for the emoji section
@@ -123,57 +139,86 @@ class _ChatScreenState extends State<ChatScreen> {
   // this function is for our custom app bar
   Widget _appBar() {
     return InkWell(
-      onTap: () {},
-      child: Row(
-        children: [
-          //  back button
-          IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.arrow_back)),
+        onTap: () {},
+        child: StreamBuilder(
+          stream: Providers.getOppUserInfo(widget.chatUserOpp),
+          builder: (context, snapshot) {
+            //  this contains the list of opp user documents
+            log(snapshot.hasData.toString());
+            final oppUserDocuments = snapshot.data?.docs;
+            log('doc is arriveed $oppUserDocuments.toString()');
+            listOfOppUserDocument = oppUserDocuments
+                    ?.map((e) => ChatUser.fromJson(e.data()))
+                    .toList() ??
+                [];
+            log(listOfOppUserDocument.length.toString());
 
-          // user profile picture
-          ClipRRect(
-            borderRadius: BorderRadius.circular(mq.height * .03),
-            child: CachedNetworkImage(
-              width: mq.height * .05,
-              height: mq.height * .05,
-              imageUrl: widget.chatUserOpp.image,
-              placeholder: (context, url) => const CircularProgressIndicator(),
-              errorWidget: (context, url, error) => const Icon(Icons.person),
-            ),
-          ),
+            return Row(
+              children: [
+                //  back button
+                IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.arrow_back)),
 
-          const SizedBox(width: 15),
+                // user profile picture
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(mq.height * .03),
+                  child: CachedNetworkImage(
+                    width: mq.height * .05,
+                    height: mq.height * .05,
+                    imageUrl: listOfOppUserDocument.isNotEmpty
+                        ? listOfOppUserDocument[0].image
+                        : widget.chatUserOpp.image,
+                    placeholder: (context, url) =>
+                        const CircularProgressIndicator(),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.person),
+                  ),
+                ),
 
-          // name of the user and last seen
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // for name
-              Text(
-                widget.chatUserOpp.name,
-                style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 2),
-              // for last seen
-              const Text(
-                'Last seen not available',
-                style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 15,
-                    fontWeight: FontWeight.normal),
-              )
-            ],
-          )
-        ],
-      ),
-    );
+                const SizedBox(width: 15),
+
+                // name of the user and last seen
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // for name
+                    Text(
+                      listOfOppUserDocument.isNotEmpty
+                          ? listOfOppUserDocument[0].name
+                          : widget.chatUserOpp.name,
+                      style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    // for last seen
+                    Text(
+                      listOfOppUserDocument.isNotEmpty
+                          ? listOfOppUserDocument[0].isOnline
+                              ? 'Online'
+                              : MyDateUtil.getLastActiveTime(
+                                  context: context,
+                                  lastActive:
+                                      listOfOppUserDocument[0].lastActive)
+                          : MyDateUtil.getLastActiveTime(
+                              context: context,
+                              lastActive: listOfOppUserDocument[0].lastActive),
+                      style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal),
+                    )
+                  ],
+                )
+              ],
+            );
+          },
+        ));
   }
 
   // this function is for buttom chat input field
@@ -224,7 +269,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   // for gallery
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        // Pick a list of images.
+                        final List<XFile> images =
+                            await picker.pickMultiImage(imageQuality: 60);
+
+                        //  iterate through the list and send the images
+                        for (var singleImage in images) {
+                          //  change the state and set image is uploading to true
+                          setState(() {
+                            imageIsUploading = !imageIsUploading;
+                          });
+                          await Providers.sendImageAsMessage(
+                              widget.chatUserOpp, File(singleImage.path));
+                          //  change the state and set the image is uploading is false
+                          setState(() {
+                            imageIsUploading = !imageIsUploading;
+                          });
+                        }
+                      },
                       icon: const Icon(
                         Icons.image,
                         color: Colors.blueAccent,

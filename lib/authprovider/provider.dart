@@ -66,7 +66,7 @@ class Providers {
   }
 
   //  this function get the user with specified id and store it in a chatuser object ( used for the profile section )
-  static Future<void> currentUserInfo() async {
+  static Future<void> currentUserExists() async {
     await fbFirestoreObj
         .collection('users')
         .doc(googleAuthUser.uid)
@@ -75,12 +75,29 @@ class Providers {
       if (user.exists) {
         currentChatUser = ChatUser.fromJson(user.data()!);
       } else {
-        await Providers.createUser().then((user) => currentUserInfo());
+        await Providers.createUser().then((user) => currentUserExists());
       }
     });
   }
 
-  //  this function is used for updating the user info
+  // this function is for getting the oppsite user information
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getOppUserInfo(
+      ChatUser chatUserOpp) {
+    return fbFirestoreObj
+        .collection('users')
+        .where('id', isEqualTo: chatUserOpp.id)
+        .snapshots();
+  }
+
+  //  this below function is used for updating our online status and last active online
+  static Future<void> updateActiveStatus(bool isOnline) async {
+    await fbFirestoreObj.collection('users').doc(googleAuthUser.uid).update({
+      'is_online': isOnline,
+      'last_active': DateTime.fromMillisecondsSinceEpoch.toString()
+    });
+  }
+
+  //  this function is used for updating the user info ( name , about )
   static Future<void> updateCurrentUserInfo() async {
     await fbFirestoreObj.collection('users').doc(googleAuthUser.uid).update({
       'name': currentChatUser.name,
