@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/services.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/main.dart';
 import 'package:mymessages/models/chat_user.dart';
@@ -23,8 +24,30 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     Providers
         .currentUserExists(); // this fetches the user document in firebase or creates the user document  if does not exits
+    //  as the home screen gets loaded set the current users active status to loaded
+    Providers.updateActiveStatus(true);
+
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      //  resume condition gets true when the app comes back in use
+      if (message.toString().contains('resume')) {
+        Providers.updateActiveStatus(true);
+      }
+      //  pause condition gets true when the app goes to the background and no use currently
+      if (message.toString().contains('pause')) {
+        Providers.updateActiveStatus(false);
+      }
+
+      return Future.value(message);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    Providers.updateActiveStatus(false);
   }
 
   @override
@@ -104,8 +127,8 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.only(bottom: 20),
             child: FloatingActionButton(
               onPressed: () async {
-                await Providers.fbAuthObj.signOut();
-                await GoogleSignIn().signOut();
+                // await Providers.fbAuthObj.signOut();
+                // await GoogleSignIn().signOut();
               },
               child: const Icon(Icons.add_comment_rounded),
             ),

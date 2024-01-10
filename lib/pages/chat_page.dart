@@ -22,9 +22,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  //  for storing list of messages
+  //  for storing list of messages of the both users
   List<Message> messageList = [];
-
+// this will contains opp user's document
   List<ChatUser> listOfOppUserDocument = [];
   //  to store the text in the the text editing controller
   final textController = TextEditingController();
@@ -143,80 +143,87 @@ class _ChatScreenState extends State<ChatScreen> {
         child: StreamBuilder(
           stream: Providers.getOppUserInfo(widget.chatUserOpp),
           builder: (context, snapshot) {
-            //  this contains the list of opp user documents
-            log(snapshot.hasData.toString());
-            final oppUserDocuments = snapshot.data?.docs;
-            log('doc is arriveed $oppUserDocuments.toString()');
-            listOfOppUserDocument = oppUserDocuments
-                    ?.map((e) => ChatUser.fromJson(e.data()))
-                    .toList() ??
-                [];
-            log(listOfOppUserDocument.length.toString());
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+              case ConnectionState.none:
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              case ConnectionState.active:
+              case ConnectionState.done:
+                //  this contains the list of opp user documents
+                final oppUserDocuments = snapshot.data?.docs;
+                listOfOppUserDocument = oppUserDocuments
+                        ?.map((e) => ChatUser.fromJson(e.data()))
+                        .toList() ??
+                    [];
 
-            return Row(
-              children: [
-                //  back button
-                IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.arrow_back)),
-
-                // user profile picture
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(mq.height * .03),
-                  child: CachedNetworkImage(
-                    width: mq.height * .05,
-                    height: mq.height * .05,
-                    imageUrl: listOfOppUserDocument.isNotEmpty
-                        ? listOfOppUserDocument[0].image
-                        : widget.chatUserOpp.image,
-                    placeholder: (context, url) =>
-                        const CircularProgressIndicator(),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.person),
-                  ),
-                ),
-
-                const SizedBox(width: 15),
-
-                // name of the user and last seen
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                return Row(
                   children: [
-                    // for name
-                    Text(
-                      listOfOppUserDocument.isNotEmpty
-                          ? listOfOppUserDocument[0].name
-                          : widget.chatUserOpp.name,
-                      style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                    //  back button
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.arrow_back)),
+
+                    // user profile picture
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(mq.height * .03),
+                      child: CachedNetworkImage(
+                        width: mq.height * .05,
+                        height: mq.height * .05,
+                        imageUrl: listOfOppUserDocument.isNotEmpty
+                            ? listOfOppUserDocument[0].image
+                            : widget.chatUserOpp.image,
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.person),
+                      ),
                     ),
-                    const SizedBox(height: 2),
-                    // for last seen
-                    Text(
-                      listOfOppUserDocument.isNotEmpty
-                          ? listOfOppUserDocument[0].isOnline
-                              ? 'Online'
+
+                    const SizedBox(width: 15),
+
+                    // name of the user and last seen
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // for name
+                        Text(
+                          listOfOppUserDocument.isNotEmpty
+                              ? listOfOppUserDocument[0].name
+                              : widget.chatUserOpp.name,
+                          style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        // for last seen
+                        Text(
+                          listOfOppUserDocument.isNotEmpty
+                              ? listOfOppUserDocument[0].isOnline
+                                  ? 'Online'
+                                  : MyDateUtil.getLastActiveTime(
+                                      context: context,
+                                      lastActive:
+                                          listOfOppUserDocument[0].lastActive)
                               : MyDateUtil.getLastActiveTime(
                                   context: context,
                                   lastActive:
-                                      listOfOppUserDocument[0].lastActive)
-                          : MyDateUtil.getLastActiveTime(
-                              context: context,
-                              lastActive: listOfOppUserDocument[0].lastActive),
-                      style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal),
+                                      listOfOppUserDocument[0].lastActive),
+                          style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal),
+                        )
+                      ],
                     )
                   ],
-                )
-              ],
-            );
+                );
+            }
           },
         ));
   }

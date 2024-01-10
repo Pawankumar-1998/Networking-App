@@ -34,7 +34,7 @@ class Providers {
 
   // this function is used for create user
   static Future<void> createUser() async {
-    final time = DateTime.now().microsecondsSinceEpoch.toString();
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
 
     //  here the chatUser get it properties from the google user
     final chatUser = ChatUser(
@@ -91,9 +91,9 @@ class Providers {
 
   //  this below function is used for updating our online status and last active online
   static Future<void> updateActiveStatus(bool isOnline) async {
-    await fbFirestoreObj.collection('users').doc(googleAuthUser.uid).update({
+    fbFirestoreObj.collection('users').doc(googleAuthUser.uid).update({
       'is_online': isOnline,
-      'last_active': DateTime.fromMillisecondsSinceEpoch.toString()
+      'last_active': DateTime.now().microsecondsSinceEpoch.toString()
     });
   }
 

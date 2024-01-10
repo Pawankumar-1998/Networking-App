@@ -86,8 +86,8 @@ class _ChatUserCardState extends State<ChatUserCard> {
                             )
                           //  if the below conditions hits it means the message is read and we should show the sent time of the message
                           : Text(
-                              MyDateUtil.getLastMessage(
-                                  context: context, sentTime: message!.sent),
+                              MyDateUtil.getLastMessageTime(
+                                  context: context, time: message!.sent),
                               style: const TextStyle(color: Colors.black54),
                             ));
             },
