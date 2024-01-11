@@ -10,7 +10,8 @@ class MyDateUtil {
 
   // for getting formatted time for sent & read
   static String getMessageTime(
-      {required BuildContext context, required String time}) {
+      {required BuildContext context,
+      required String time}) {
     final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
     final DateTime now = DateTime.now();
 

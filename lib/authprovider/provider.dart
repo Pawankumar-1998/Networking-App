@@ -85,7 +85,7 @@ class Providers {
       ChatUser chatUserOpp) {
     return fbFirestoreObj
         .collection('users')
-        .where('id', isEqualTo: chatUserOpp.id)
+        .where('id', isEqualTo: chatUserOpp.id)    
         .snapshots();
   }
 

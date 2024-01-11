@@ -9,6 +9,7 @@ import 'package:mymessages/authprovider/provider.dart';
 import 'package:mymessages/helper/my_date_util.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/models/message.dart';
+import 'package:mymessages/pages/user_profile_page.dart';
 import 'package:mymessages/widgets/message_card.dart';
 
 import '../main.dart';
@@ -139,7 +140,15 @@ class _ChatScreenState extends State<ChatScreen> {
   // this function is for our custom app bar
   Widget _appBar() {
     return InkWell(
-        onTap: () {},
+        onTap: () {
+          // when user clicks on the app bar he should move to opp user profile screen to see his details
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    OppUserProfilePage(chatUser: widget.chatUserOpp),
+              ));
+        },
         child: StreamBuilder(
           stream: Providers.getOppUserInfo(widget.chatUserOpp),
           builder: (context, snapshot) {
