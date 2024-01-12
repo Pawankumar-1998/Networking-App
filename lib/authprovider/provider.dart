@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/models/message.dart';
@@ -21,7 +22,21 @@ class Providers {
   static User get googleAuthUser => fbAuthObj.currentUser!;
 
   // this is used to store the current user
-  static late ChatUser currentChatUser;
+  static late ChatUser ownChatUser;
+
+  //  this object is used for the message notification in the app
+  static FirebaseMessaging fbMessagingObj = FirebaseMessaging.instance;
+
+  //  this function is used for get the user permission for the notification messages
+  static Future<void> getFirebaseMessagingToken() async {
+    await fbMessagingObj.requestPermission();
+
+    await fbMessagingObj.getToken().then((token) {
+      if (token != null) {
+        ownChatUser.pushToken = token;
+      }
+    });
+  }
 
   // function for checking if the user exist or not in db
   static Future<bool> userExists() async {
@@ -73,7 +88,11 @@ class Providers {
         .get()
         .then((user) async {
       if (user.exists) {
-        currentChatUser = ChatUser.fromJson(user.data()!);
+        ownChatUser = ChatUser.fromJson(user.data()!);
+        await getFirebaseMessagingToken();
+        Providers.updateActiveStatus(true);
+
+        log('update user doc : ${user.data()}');
       } else {
         await Providers.createUser().then((user) => currentUserExists());
       }
@@ -85,7 +104,7 @@ class Providers {
       ChatUser chatUserOpp) {
     return fbFirestoreObj
         .collection('users')
-        .where('id', isEqualTo: chatUserOpp.id)    
+        .where('id', isEqualTo: chatUserOpp.id)
         .snapshots();
   }
 
@@ -93,15 +112,16 @@ class Providers {
   static Future<void> updateActiveStatus(bool isOnline) async {
     fbFirestoreObj.collection('users').doc(googleAuthUser.uid).update({
       'is_online': isOnline,
-      'last_active': DateTime.now().microsecondsSinceEpoch.toString()
+      'last_active': DateTime.now().microsecondsSinceEpoch.toString(),
+      'push_token': ownChatUser.pushToken
     });
   }
 
   //  this function is used for updating the user info ( name , about )
   static Future<void> updateCurrentUserInfo() async {
     await fbFirestoreObj.collection('users').doc(googleAuthUser.uid).update({
-      'name': currentChatUser.name,
-      'about': currentChatUser.about,
+      'name': ownChatUser.name,
+      'about': ownChatUser.about,
     });
   }
 
@@ -125,13 +145,13 @@ class Providers {
     });
 
     // this below line of code is used for updating the latest image in the firebase firestore
-    currentChatUser.image =
+    ownChatUser.image =
         await ref.getDownloadURL(); // this is for getting the url of the image
 
     await fbFirestoreObj
         .collection('users')
         .doc(googleAuthUser.uid)
-        .update({'image': currentChatUser.image});
+        .update({'image': ownChatUser.image});
   }
 
   /// the below codes are for the chat messages
