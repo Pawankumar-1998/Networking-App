@@ -6,6 +6,7 @@ import 'package:mymessages/main.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/models/message.dart';
 import 'package:mymessages/pages/chat_page.dart';
+import 'package:mymessages/pages/dialog/profile_dialog.dart';
 
 class ChatUserCard extends StatefulWidget {
   // this user contains all the details of the opposite Chat user
@@ -48,17 +49,26 @@ class _ChatUserCardState extends State<ChatUserCard> {
               }
               return ListTile(
                   //  image or profile pic of the user
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(mq.height * .4),
-                    child: CachedNetworkImage(
-                      width: mq.width * .12,
-                      height: mq.height * .1,
-                      fit: BoxFit.fill,
-                      imageUrl: widget.chatUserOpp.image,
-                      placeholder: (context, url) =>
-                          const CircularProgressIndicator(),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.person),
+                  leading: InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            ProfileDialog(chatUserOpp: widget.chatUserOpp),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(mq.height * .4),
+                      child: CachedNetworkImage(
+                        width: mq.width * .12,
+                        height: mq.height * .1,
+                        fit: BoxFit.fill,
+                        imageUrl: widget.chatUserOpp.image,
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.person),
+                      ),
                     ),
                   ),
                   //  name of the opp user
