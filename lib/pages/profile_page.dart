@@ -144,7 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextFormField(
                     initialValue: widget.chatUser.name,
                     onSaved: (newValue) =>
-                        Providers.currentChatUser.name = newValue ?? '',
+                        Providers.ownChatUser.name = newValue ?? '',
                     validator: (value) => value != null && value.isNotEmpty
                         ? null
                         : 'Invalid username',
@@ -161,7 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextFormField(
                     initialValue: widget.chatUser.about,
                     onSaved: (newValue) =>
-                        Providers.currentChatUser.about = newValue ?? '',
+                        Providers.ownChatUser.about = newValue ?? '',
                     validator: (value) => value != null && value.isNotEmpty
                         ? null
                         : 'Invalid-About',
