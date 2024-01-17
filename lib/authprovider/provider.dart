@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -7,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/models/message.dart';
+import 'package:http/http.dart' as http;
 
 class Providers {
   // this is a authentication object used to authenticate the user
@@ -36,6 +38,34 @@ class Providers {
         ownChatUser.pushToken = token;
       }
     });
+  }
+
+  // this below function is used for the push notification
+  static Future<void> sendPushNotification(
+      ChatUser chatUserOpp, String msg) async {
+    try {
+      // think it of as the body of the letter
+      final body = {
+        "to": chatUserOpp.pushToken,
+        "notification": {"title": ownChatUser.name, "body": msg}
+      };
+
+      var response =
+          //  sending the request to the server
+          await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
+              //  think it as the details on the letter card
+              headers: {
+                HttpHeaders.contentTypeHeader: 'application/json',
+                //  think this as the post office address
+                HttpHeaders.authorizationHeader:
+                    'key = AAAAV6GHZmo:APA91bFEAvBO1Ha0_X2GmURxXUy3KTcp2fcPUOLJ3zia-IDjEfeJaMbU4mAen-fRZ0NDimLJbq1lPiW5vhkYiR85nPXaextFFUi8rMEhQ92dzbf2jJhgx5ZGqywPUWR2dQxp6V-xcDg9'
+              },
+              body: jsonEncode(body));
+
+      log('${response.statusCode}');
+    } catch (e) {
+      log('error : $e');
+    }
   }
 
   // function for checking if the user exist or not in db
@@ -192,7 +222,8 @@ class Providers {
         'chats/${getUniqueConversationId(chatUserOpp.id)}/messages/');
 
     // this is putting the data/ document in the address which ref is pointing
-    await ref.doc(time).set(message.toJson());
+    await ref.doc(time).set(message.toJson()).then((value) =>
+        sendPushNotification(chatUserOpp, type == Type.text ? msg : 'image'));
   }
 
   // this below function is used for setting the blue tick or sets as message has been seen by the oppsite user in the Green messages
