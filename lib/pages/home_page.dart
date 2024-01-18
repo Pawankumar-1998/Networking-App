@@ -28,25 +28,21 @@ class _HomePageState extends State<HomePage> {
     Providers
         .currentUserExists(); // this fetches the user document in firebase or creates the user document  if does not exits
     //  as the home screen gets loaded set the current users active status to loaded
-    Providers.updateActiveStatus(true);
 
     SystemChannels.lifecycle.setMessageHandler((message) {
-
-        if(Providers.fbAuthObj.currentUser != null) {
-      //  resume condition gets true when the app comes back in use
-      if (message.toString().contains('resume')) {
-        Providers.updateActiveStatus(true);
-      }
-      //  pause condition gets true when the app goes to the background and no use currently
-      if (message.toString().contains('pause')) {
-        Providers.updateActiveStatus(false);
-      }
+      if (Providers.fbAuthObj.currentUser != null) {
+        //  resume condition gets true when the app comes back in use
+        if (message.toString().contains('resume')) {
+          Providers.updateActiveStatus(true);
         }
+        //  pause condition gets true when the app goes to the background and no use currently
+        if (message.toString().contains('pause')) {
+          Providers.updateActiveStatus(false);
+        }
+      }
       return Future.value(message);
     });
   }
-
- 
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) =>
-                          ProfilePage(chatUser: Providers.currentChatUser),
+                          ProfilePage(chatUser: Providers.ownChatUser),
                     ));
                   },
                   icon: const Icon(Icons.people_alt)),

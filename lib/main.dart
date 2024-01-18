@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_notification_channel/flutter_notification_channel.dart';
+import 'package:flutter_notification_channel/notification_importance.dart';
 import 'package:mymessages/firebase_options.dart';
 import 'package:mymessages/pages/splash_page.dart';
 
@@ -33,4 +37,13 @@ _initializeFirebase() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // this is for creating a channel for notifications
+  var result = await FlutterNotificationChannel.registerNotificationChannel(
+    description: 'Chat Notification',
+    id: 'chats',
+    importance: NotificationImportance.IMPORTANCE_HIGH,
+    name: 'Chats',
+  );
+  log(result);
 }
