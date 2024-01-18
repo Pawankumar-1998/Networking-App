@@ -31,11 +31,21 @@ class Providers {
 
   //  this function is used for get the user permission for the notification messages
   static Future<void> getFirebaseMessagingToken() async {
+    // for requesting the permission from the user
     await fbMessagingObj.requestPermission();
 
     await fbMessagingObj.getToken().then((token) {
       if (token != null) {
         ownChatUser.pushToken = token;
+      }
+    });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      log('Got a message whilst in the foreground!');
+      log('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        log('Message also contained a notification: ${message.notification}');
       }
     });
   }
@@ -46,8 +56,17 @@ class Providers {
     try {
       // think it of as the body of the letter
       final body = {
+        //  address of the opp user
         "to": chatUserOpp.pushToken,
-        "notification": {"title": ownChatUser.name, "body": msg}
+        //  content of the notification
+        "notification": {
+          "title": ownChatUser.name,
+          "body": msg,
+          "android_channel_id": "chats"
+        },
+        "data": {
+          "user_data": "User ID : ${ownChatUser.id}",
+        },
       };
 
       var response =
@@ -119,7 +138,9 @@ class Providers {
         .then((user) async {
       if (user.exists) {
         ownChatUser = ChatUser.fromJson(user.data()!);
+        // get the FCM token
         await getFirebaseMessagingToken();
+        //  update the last seen and the FCM token in the firbase
         Providers.updateActiveStatus(true);
 
         log('update user doc : ${user.data()}');
