@@ -17,9 +17,13 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    return Providers.googleAuthUser.uid == widget.message.fromId
-        ? _greenMessage()
-        : _blueMessage();
+    bool myMsg = Providers.googleAuthUser.uid == widget.message.fromId;
+    return InkWell(
+      onLongPress: () {
+        _showBottomSheet(myMsg);
+      },
+      child: myMsg ? _greenMessage() : _blueMessage(),
+    );
   }
 
   //  for opposite person message
@@ -147,6 +151,125 @@ class _MessageCardState extends State<MessageCard> {
                     )),
         )
       ],
+    );
+  }
+
+//  this below code is for the bottom sheet
+  void _showBottomSheet(bool myMsg) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      builder: (_) {
+        return ListView(
+          shrinkWrap: true,
+          children: [
+            // divider
+            Container(
+              height: 4,
+              margin: EdgeInsets.symmetric(
+                  horizontal: mq.width * .4, vertical: mq.height * .015),
+              decoration: BoxDecoration(
+                  color: Colors.grey, borderRadius: BorderRadius.circular(8)),
+            ),
+            // first row for copy item or the save option for image
+            widget.message.type == Type.text
+                ? _OptionItems(
+                    icon: const Icon(
+                      Icons.copy_all_rounded,
+                      color: Colors.blue,
+                      size: 26,
+                    ),
+                    name: 'Copy Text',
+                    onTap: () {},
+                  )
+                : _OptionItems(
+                    icon: const Icon(Icons.save_alt),
+                    name: 'Save',
+                    onTap: () {},
+                  ),
+            // divider
+            if (myMsg)
+              Divider(
+                color: Colors.black,
+                indent: mq.width * .04,
+                endIndent: mq.width * .04,
+              ),
+            //  second row for the edit option
+            if (widget.message.type == Type.text && myMsg)
+              _OptionItems(
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                name: 'Edit',
+                onTap: () {},
+              ),
+            // third row is for delete option
+            if (myMsg)
+              _OptionItems(
+                icon: const Icon(Icons.delete, color: Colors.blue),
+                name: 'Delete',
+                onTap: () {},
+              ),
+            // divider
+            Divider(
+              color: Colors.black,
+              indent: mq.width * .04,
+              endIndent: mq.width * .04,
+            ),
+            // fourth row is for dilvered at option
+            _OptionItems(
+              icon: const Icon(
+                Icons.remove_red_eye_rounded,
+                color: Colors.blue,
+              ),
+              name: 'Delivered at :',
+              onTap: () {},
+            ),
+            // fifth row is for seen at option
+            _OptionItems(
+              icon: const Icon(
+                Icons.remove_red_eye_outlined,
+                color: Colors.green,
+              ),
+              name: 'Seen at :',
+              onTap: () {},
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+//  stateless widget for the icons and the row
+class _OptionItems extends StatelessWidget {
+  final Icon icon;
+  final String name;
+  final VoidCallback onTap;
+
+  const _OptionItems(
+      {required this.icon, required this.name, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap,
+      child: Padding(
+        padding: EdgeInsets.only(
+            left: mq.width * .05,
+            top: mq.height * .015,
+            bottom: mq.height * .015),
+        child: Row(children: [
+          // icon
+          icon,
+          // name
+          Text(
+            '     $name',
+            style: const TextStyle(
+                fontSize: 15, color: Colors.black54, letterSpacing: 0.5),
+          )
+        ]),
+      ),
     );
   }
 }
