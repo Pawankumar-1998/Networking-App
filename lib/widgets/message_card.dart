@@ -1,9 +1,17 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:gallery_saver_updated/gallery_saver.dart';
+import 'package:http/http.dart';
 import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/helper/dialog_box.dart';
 import 'package:mymessages/helper/my_date_util.dart';
 import 'package:mymessages/main.dart';
 import 'package:mymessages/models/message.dart';
+import 'package:path_provider/path_provider.dart';
 
 class MessageCard extends StatefulWidget {
   const MessageCard({super.key, required this.message});
@@ -176,18 +184,50 @@ class _MessageCardState extends State<MessageCard> {
             // first row for copy item or the save option for image
             widget.message.type == Type.text
                 ? _OptionItems(
+                    context: context,
                     icon: const Icon(
                       Icons.copy_all_rounded,
                       color: Colors.blue,
                       size: 26,
                     ),
                     name: 'Copy Text',
-                    onTap: () {},
+                    onTap: () async {
+                      await Clipboard.setData(
+                              ClipboardData(text: widget.message.msg))
+                          .then((value) {
+                        //  to hide the bottom sheet
+                        Navigator.pop(context);
+                        Dialogs.showSnackbar(context, 'Text copied !');
+                      });
+                    },
                   )
+                //  for saving the image
                 : _OptionItems(
+                    context: context,
                     icon: const Icon(Icons.save_alt),
                     name: 'Save',
-                    onTap: () {},
+                    onTap: () async {
+                      try {
+                        final bytes = (await get(Uri.parse(widget.message.msg)))
+                            .bodyBytes;
+                        final tempDir = await getTemporaryDirectory();
+                        final file =
+                            await File('${tempDir.path}/messageApp.png')
+                                .writeAsBytes(bytes);
+                        log(file.path);
+                        await GallerySaver.saveImage(file.path,
+                                albumName: 'We chat')
+                            .then((success) {
+                          if (success != null && success) {
+                            Navigator.pop(context);
+                            Dialogs.showSnackbar(
+                                context, 'Image saved to gallery !');
+                          }
+                        });
+                      } catch (e) {
+                        log('error by saving image $e');
+                      }
+                    },
                   ),
             // divider
             if (myMsg)
@@ -199,6 +239,7 @@ class _MessageCardState extends State<MessageCard> {
             //  second row for the edit option
             if (widget.message.type == Type.text && myMsg)
               _OptionItems(
+                context: context,
                 icon: const Icon(Icons.edit, color: Colors.blue),
                 name: 'Edit',
                 onTap: () {},
@@ -206,9 +247,14 @@ class _MessageCardState extends State<MessageCard> {
             // third row is for delete option
             if (myMsg)
               _OptionItems(
+                context: context,
                 icon: const Icon(Icons.delete, color: Colors.blue),
                 name: 'Delete',
-                onTap: () {},
+                onTap: () {
+                  Providers.deleteMessage(widget.message).then((value) {
+                    Navigator.pop(context);
+                  });
+                },
               ),
             // divider
             Divider(
@@ -218,20 +264,25 @@ class _MessageCardState extends State<MessageCard> {
             ),
             // fourth row is for dilvered at option
             _OptionItems(
+              context: context,
               icon: const Icon(
                 Icons.remove_red_eye_rounded,
                 color: Colors.blue,
               ),
-              name: 'Delivered at :',
+              name:
+                  'Sent at :${MyDateUtil.getMessageTime(context: context, time: widget.message.sent)}',
               onTap: () {},
             ),
             // fifth row is for seen at option
             _OptionItems(
+              context: context,
               icon: const Icon(
                 Icons.remove_red_eye_outlined,
                 color: Colors.green,
               ),
-              name: 'Seen at :',
+              name: widget.message.read.isNotEmpty
+                  ? 'Seen at :${MyDateUtil.getMessageTime(context: context, time: widget.message.read)}'
+                  : 'Seen at : Not yet seen ',
               onTap: () {},
             ),
           ],
@@ -243,17 +294,21 @@ class _MessageCardState extends State<MessageCard> {
 
 //  stateless widget for the icons and the row
 class _OptionItems extends StatelessWidget {
+  final BuildContext context;
   final Icon icon;
   final String name;
   final VoidCallback onTap;
 
   const _OptionItems(
-      {required this.icon, required this.name, required this.onTap});
+      {required this.icon,
+      required this.name,
+      required this.onTap,
+      required this.context});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {                                           
     return InkWell(
-      onTap: () => onTap,
+      onTap: () => onTap(),
       child: Padding(
         padding: EdgeInsets.only(
             left: mq.width * .05,
