@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -180,7 +179,7 @@ class Providers {
     return fbFirestoreObj
         .collection('users')
         .where('id', whereIn: friendsUserIds.isEmpty ? [''] : friendsUserIds)
-        .where('id', isEqualTo: googleAuthUser.uid)
+        .where('id', isNotEqualTo: googleAuthUser.uid)
         .snapshots();
   }
 
@@ -288,7 +287,7 @@ class Providers {
         .doc(chatUserOpp.id)
         .collection('my_friends')
         .doc(googleAuthUser.uid)
-        .set({}).then((value) => sendFirstMessage(chatUserOpp, msg, type));
+        .set({}).then((value) => sendMessage(chatUserOpp, msg, type));
   }
 
   //  this below function is used to send the messages (chatUser)
