@@ -50,6 +50,29 @@ class Providers {
     });
   }
 
+  //  this function below is used to add a chatuser as a friend
+  static Future<bool> addFriend(String email) async {
+    // get the document
+    final data = await fbFirestoreObj
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    log('$data');
+
+    //  put it in the following reference
+    if (data.docs.isNotEmpty && data.docs.first.id != googleAuthUser.uid) {
+      fbFirestoreObj
+          .collection('users')
+          .doc(googleAuthUser.uid)
+          .collection('my_friends')
+          .doc(data.docs.first.id)
+          .set({});
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // this below function is used for the push notification
   static Future<void> sendPushNotification(
       ChatUser chatUserOpp, String msg) async {
@@ -87,6 +110,27 @@ class Providers {
     }
   }
 
+  // this function is used for updating the message
+  static Future<void> updateMessage(Message message, String updateMsg) async {
+    await fbFirestoreObj
+        .collection('chats/${getUniqueConversationId(message.toId)}/messages/')
+        .doc(message.sent)
+        .update({'msg': updateMsg});
+  }
+
+  //  this function is used for deleting the doc from the firestore
+  static Future<void> deleteMessage(Message message) async {
+    await fbFirestoreObj
+        .collection('chats/${getUniqueConversationId(message.toId)}/messages/')
+        .doc(message.sent)
+        .delete();
+
+    // if the message is of type image then it shpuld be deleted from the google storage database
+    if (message.type == Type.image) {
+      fbStorageObj.refFromURL(message.msg);
+    }
+  }
+
   // function for checking if the user exist or not in db
   static Future<bool> userExists() async {
     return (await fbFirestoreObj
@@ -120,12 +164,23 @@ class Providers {
         .set(chatUser.toJson());
   }
 
-  //  this function gets all the document(users) from the collection(table)
-  //  excepts the document where the id is user id ( used for the chat screen )
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUser() {
+  // this functions is used to get the users who are in our own friends collections
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMyFriendsUserId() {
     return fbFirestoreObj
         .collection('users')
-        .where('id', isNotEqualTo: googleAuthUser.uid)
+        .doc(googleAuthUser.uid)
+        .collection('my_friends')
+        .snapshots();
+  }
+
+  //  this function gets all the document(users) from the collection(table)
+  //  excepts the document where the id is user id ( used for the chat screen )
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUser(
+      List<String> friendsUserIds) {
+    return fbFirestoreObj
+        .collection('users')
+        .where('id', whereIn: friendsUserIds.isEmpty ? [''] : friendsUserIds)
+        .where('id', isEqualTo: googleAuthUser.uid)
         .snapshots();
   }
 
@@ -221,6 +276,19 @@ class Providers {
             'chats/${getUniqueConversationId(chatUserOpp.id)}/messages/')
         .orderBy('sent', descending: true)
         .snapshots();
+  }
+
+  // this function is used for the sending the first message
+  static Future<void> sendFirstMessage(
+      ChatUser chatUserOpp, String msg, Type type) async {
+    // we need to first set our document in the opp user my friend collection because initially our document does not
+    //  present in the opp user my friend collection
+    await fbFirestoreObj
+        .collection('users')
+        .doc(chatUserOpp.id)
+        .collection('my_friends')
+        .doc(googleAuthUser.uid)
+        .set({}).then((value) => sendFirstMessage(chatUserOpp, msg, type));
   }
 
   //  this below function is used to send the messages (chatUser)
