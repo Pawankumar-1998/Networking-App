@@ -339,9 +339,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 const EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 10),
             onPressed: () {
               if (textController.text.isNotEmpty) {
-                Providers.sendMessage(
-                    widget.chatUserOpp, textController.text, Type.text);
-                textController.text = '';
+                if (messageList.isEmpty) {
+                  log('${messageList.length}');
+                  // if the message list is empty means it is the first message
+                  Providers.sendFirstMessage(
+                      widget.chatUserOpp, textController.text, Type.text);
+                } else {
+                  log('message list ${messageList.length}');
+                  Providers.sendMessage(
+                      widget.chatUserOpp, textController.text, Type.text);
+                }
+                textController.clear();
               }
             },
             shape: const CircleBorder(),
