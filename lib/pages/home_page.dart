@@ -1,8 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mymessages/authprovider/provider.dart';
+import 'package:mymessages/helper/dialog_box.dart';
 import 'package:mymessages/main.dart';
 import 'package:mymessages/models/chat_user.dart';
 import 'package:mymessages/pages/profile_page.dart';
@@ -121,8 +123,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.only(bottom: 20),
             child: FloatingActionButton(
               onPressed: () async {
-                // await Providers.fbAuthObj.signOut();
-                // await GoogleSignIn().signOut();
+                addEmailDialog();
               },
               child: const Icon(Icons.add_comment_rounded),
             ),
@@ -130,44 +131,133 @@ class _HomePageState extends State<HomePage> {
 
           //  getting the list of user form the data base
           body: StreamBuilder(
-              stream: Providers.getAllUser(),
-              builder: (context, snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                  case ConnectionState.none:
-                    return const Center(child: CircularProgressIndicator());
+            //  gets the users list from the my friends collection
+            stream: Providers.getMyFriendsUserId(),
+            builder: (context, snapshot) {
+              switch (snapshot.connectionState) {
+                // if the data is under fetching
+                case ConnectionState.waiting:
+                case ConnectionState.none:
+                  return const Center(child: CircularProgressIndicator());
+                // if the data is fetched
+                case ConnectionState.active:
+                case ConnectionState.done:
+                  log('first function ${snapshot.hasData}');
+                  log('first function ${snapshot.data?.docs.length}');
+                  return StreamBuilder(
+                    stream: Providers.getAllUser(
+                        snapshot.data?.docs.map((e) => e.id).toList() ?? []),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                        // return const Center(
+                        //     child: CircularProgressIndicator());
 
-                  case ConnectionState.active:
-                  case ConnectionState.done:
-                    final data = snapshot.data?.docs;
-                    _list = data
-                            ?.map((singleDocument) =>
-                                ChatUser.fromJson(singleDocument.data()))
-                            .toList() ??
-                        [];
-                }
-                if (_list.isNotEmpty) {
-                  return ListView.builder(
-                    padding: EdgeInsets.only(top: mq.height * .01),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: _isSearching ? _searchList.length : _list.length,
-                    itemBuilder: (context, index) {
-                      return ChatUserCard(
-                        chatUserOpp:
-                            _isSearching ? _searchList[index] : _list[index],
-                      );
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          log('second one ${snapshot.hasData}');
+
+                          final data = snapshot.data?.docs;
+                          log('second one ${data?.length}');
+                          _list = data
+                                  ?.map((singleDocument) =>
+                                      ChatUser.fromJson(singleDocument.data()))
+                                  .toList() ??
+                              [];
+                      }
+                      log('list length ${_list.length}');
+                      if (_list.isNotEmpty) {
+                        return ListView.builder(
+                          padding: EdgeInsets.only(top: mq.height * .01),
+                          physics: const BouncingScrollPhysics(),
+                          itemCount:
+                              _isSearching ? _searchList.length : _list.length,
+                          itemBuilder: (context, index) {
+                            return ChatUserCard(
+                              chatUserOpp: _isSearching
+                                  ? _searchList[index]
+                                  : _list[index],
+                            );
+                          },
+                        );
+                      } else {
+                        return const Center(
+                          child: Text(
+                            'No data available !',
+                            style: TextStyle(fontSize: 30),
+                          ),
+                        );
+                      }
                     },
                   );
-                } else {
-                  return const Center(
-                    child: Text(
-                      'No data available !',
-                      style: TextStyle(fontSize: 30),
-                    ),
-                  );
-                }
-              }),
+              }
+            },
+          ),
         ),
+      ),
+    );
+  }
+
+  //  this function is used to show a dialog for adding email
+  void addEmailDialog() {
+    String email = '';
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        contentPadding:
+            const EdgeInsets.only(top: 20, right: 20, left: 20, bottom: 10),
+        title: const Row(
+          children: [
+            // for email icon
+            Icon(
+              Icons.person,
+              color: Colors.blue,
+              size: 28,
+            ),
+            Text('   Add Email')
+          ],
+        ),
+        // box for entering the email
+        content: TextFormField(
+          maxLines: null,
+          initialValue: email,
+          decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.email, color: Colors.blue),
+              hintText: 'Email address',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
+          onChanged: (value) => email = value,
+        ),
+        actions: [
+          //  add button
+          MaterialButton(
+            onPressed: () async {
+              if (email.isNotEmpty) {
+                await Providers.addFriend(email).then((value) {
+                  if (!value) {
+                    Dialogs.showSnackbar(context, 'No such user exists !');
+                  }
+                });
+              }
+              // remove the alert dialog
+              // ignore: use_build_context_synchronously
+              Navigator.pop(context);
+            },
+            child: const Text('Add',
+                style: TextStyle(color: Colors.blue, fontSize: 18)),
+          ),
+          // cancel button
+          MaterialButton(
+            onPressed: () {
+              // remove the alert dialog
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel',
+                style: TextStyle(color: Colors.blue, fontSize: 18)),
+          ),
+        ],
       ),
     );
   }
