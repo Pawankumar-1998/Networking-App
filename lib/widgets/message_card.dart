@@ -242,7 +242,11 @@ class _MessageCardState extends State<MessageCard> {
                 context: context,
                 icon: const Icon(Icons.edit, color: Colors.blue),
                 name: 'Edit',
-                onTap: () {},
+                onTap: () {
+                  //  remove the bottom sheet
+                  Navigator.pop(context);
+                  _showUpdateMessageDialog();
+                },
               ),
             // third row is for delete option
             if (myMsg)
@@ -290,6 +294,56 @@ class _MessageCardState extends State<MessageCard> {
       },
     );
   }
+
+  void _showUpdateMessageDialog() {
+    String updatedMsg = widget.message.msg;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        contentPadding:
+            const EdgeInsets.only(right: 24, left: 24, bottom: 10, top: 20),
+        title: const Row(children: [
+          // for the Message icon
+          Icon(
+            Icons.message,
+            color: Colors.blue,
+            size: 28,
+          ),
+          Text('    Update Message'),
+        ]),
+        content: TextFormField(
+          initialValue: updatedMsg,
+          maxLines: null,
+          onChanged: (value) => updatedMsg = value,
+          decoration: InputDecoration(
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(20))),
+        ),
+        actions: [
+          // cancel button
+          MaterialButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          ),
+          // Update
+          MaterialButton(
+            onPressed: () {
+              Providers.updateMessage(widget.message, updatedMsg);
+              Navigator.pop(context);
+            },
+            child: const Text('Update',
+                style: TextStyle(color: Colors.blue, fontSize: 16)),
+          )
+        ],
+      ),
+    );
+  }
 }
 
 //  stateless widget for the icons and the row
@@ -306,7 +360,7 @@ class _OptionItems extends StatelessWidget {
       required this.context});
 
   @override
-  Widget build(BuildContext context) {                                           
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: () => onTap(),
       child: Padding(
